@@ -1,20 +1,14 @@
 import { createRoot } from "react-dom/client";
 import React, { useEffect, useState } from "react";
-
-type Task = {
-  description: string;
-  completed: boolean;
-};
+import type { TaskItem } from "./shared/TaskItem.js";
 
 export function Application() {
-  const [tasks, setTasks] = useState<Task[]>([
-    { description: "Create client", completed: true },
-    { description: "Fetch from server", completed: false },
-  ]);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
 
   async function loadTasks() {
     const res = await fetch("/api/tasks");
-    setTasks(await res.json());
+    const data: TaskItem[] = await res.json();
+    setTasks(data);
   }
 
   useEffect(() => {
