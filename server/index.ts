@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import type { TaskItem } from "../src/shared/TaskItem.js";
+import type { TaskItem } from "../src/shared/TaskItem.ts";
 
 const app = new Hono();
 
@@ -10,6 +10,8 @@ const tasks: TaskItem[] = [
   { description: "Fetch from server", completed: true },
   { description: "Deploy to Heroku", completed: false },
 ];
+
+// ---------------- API ROUTES ----------------
 
 app.get("/api/tasks", (c) => {
   return c.json(tasks);
@@ -41,7 +43,15 @@ app.put("/api/tasks/:index", async (c) => {
   return c.newResponse(null, 204);
 });
 
-app.use("*", serveStatic({ root: "../dist" }));
+// ---------------- STATIC FILES ----------------
+
+// Server ferdig bygget frontend (dist/)
+app.use("/*", serveStatic({ root: "../dist" }));
+
+// Catch-all for SPA routing (BrowserRouter)
+app.get("*", serveStatic({ path: "../dist/index.html" }));
+
+// ---------------- START SERVER ----------------
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
