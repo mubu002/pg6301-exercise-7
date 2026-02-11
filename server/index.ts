@@ -15,6 +15,19 @@ app.get("/api/tasks", (c) => {
   return c.json(tasks);
 });
 
+app.post("/api/tasks", async (c) => {
+  const task = await c.req.json();
+
+  const newTask: TaskItem = {
+    description: task.description,
+    completed: task.completed ?? false,
+  };
+
+  tasks.push(newTask);
+
+  return c.newResponse(null, 201);
+});
+
 app.use("*", serveStatic({ root: "../dist" }));
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
