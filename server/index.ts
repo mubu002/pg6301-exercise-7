@@ -2,8 +2,19 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import type { TaskItem } from "../src/shared/TaskItem.ts";
+import { MongoClient } from "mongodb";
 
 const app = new Hono();
+
+/* -------------------- MONGODB CONNECTION -------------------- */
+
+const MONGODB_URL = process.env.MONGODB_URL || "mongodb://localhost:27017/";
+
+const client = new MongoClient(MONGODB_URL);
+const connection = await client.connect();
+const taskDb = connection.db("task_application");
+
+/* -------------------- TEMP ARRAY (fortsatt i bruk) -------------------- */
 
 const tasks: TaskItem[] = [
   { description: "Create client", completed: true },
@@ -11,7 +22,7 @@ const tasks: TaskItem[] = [
   { description: "Deploy to Heroku", completed: false },
 ];
 
-// ---------------- API ROUTES ----------------
+/* -------------------- API ROUTES -------------------- */
 
 app.get("/api/tasks", (c) => {
   return c.json(tasks);
@@ -43,15 +54,12 @@ app.put("/api/tasks/:index", async (c) => {
   return c.newResponse(null, 204);
 });
 
-// ---------------- STATIC FILES ----------------
+/* -------------------- STATIC FILES -------------------- */
 
-// Server ferdig bygget frontend (dist/)
 app.use("/*", serveStatic({ root: "../dist" }));
-
-// Catch-all for SPA routing (BrowserRouter)
 app.get("*", serveStatic({ path: "../dist/index.html" }));
 
-// ---------------- START SERVER ----------------
+/* -------------------- START SERVER -------------------- */
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
